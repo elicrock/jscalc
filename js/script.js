@@ -7,7 +7,27 @@ document.addEventListener('DOMContentLoaded', function() {
         endButton = document.querySelector('.end-button'),
         total = document.querySelector('.total'),
         fastRange = document.querySelector('.fast-range'),
-        totalPriceSum = document.querySelector('.total_price__sum');
+        totalPriceSum = document.querySelector('.total_price__sum'),
+        adapt = document.getElementById('adapt'),
+        mobileTemplates = document.getElementById('mobileTemplates'),
+        typeSite = document.querySelector('.type-site'),
+        maxDeadline = document.querySelector('.max-deadline'),
+        rangeDeadline = document.querySelector('.range-deadline'),
+        deadlineValue = document.querySelector('.deadline-value'),
+
+        desktopTemplates = document.getElementById('desktopTemplates'),
+        editable = document.getElementById('editable'),
+        desktopTemplatesValue = document.querySelector('.desktopTemplates_value'),
+        adaptValue = document.querySelector('.adapt_value'),
+        mobileTemplatesValue = document.querySelector('.mobileTemplates_value'),
+        editableValue = document.querySelector('.editable_value');
+
+  function declOfNum(n, titles) {
+    return n + ' ' + titles[n % 10 === 1 && n % 100 !== 11 ?
+          0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2];
+  }
+
+  const DAY_STRING = ['день', 'дня', 'дней'];
           
   const DATA = {
     whichSite: ['landing', 'multiPage', 'onlineStore'],
@@ -30,10 +50,46 @@ document.addEventListener('DOMContentLoaded', function() {
     elem.style.display = 'none';
   }
 
+  function renderTextContent(total, site, maxDay, minDay) {
+    totalPriceSum.textContent = total;
+    typeSite.textContent = site;
+    maxDeadline.textContent = declOfNum(maxDay, DAY_STRING);
+    rangeDeadline.min = minDay;
+    rangeDeadline.max = maxDay;
+    deadlineValue.textContent = declOfNum(rangeDeadline.value, DAY_STRING);
+
+    if (adapt.checked) {
+      adaptValue.textContent = 'Да';
+    } else {
+      adaptValue.textContent = 'Нет';
+    }
+
+    if (mobileTemplates.checked) {
+      mobileTemplatesValue.textContent = 'Да';
+    } else {
+      mobileTemplatesValue.textContent = 'Нет';
+    }
+
+    if (desktopTemplates.checked) {
+      desktopTemplatesValue.textContent = 'Да';
+    } else {
+      desktopTemplatesValue.textContent = 'Нет';
+    }
+
+    if (editable.checked) {
+      editableValue.textContent = 'Да';
+    } else {
+      editableValue.textContent = 'Нет';
+    }
+  }
+
   function priceCalculation(elem) {
     let result = 0,
         index = 0,
-        options = [];
+        options = [],
+        site = '',
+        maxDeadlineDay = DATA.deadlineDay[index][1],
+        minDeadlineDay = DATA.deadlineDay[index][0];
 
     if (elem.name === 'whichSite') {
       for (const item of formCalculate.elements) {
@@ -47,6 +103,9 @@ document.addEventListener('DOMContentLoaded', function() {
     for (const item of formCalculate.elements) {
       if (item.name === 'whichSite' && item.checked) {
         index = DATA.whichSite.indexOf(item.value);
+        site = item.dataset.site;
+        maxDeadlineDay = DATA.deadlineDay[index][1];
+        minDeadlineDay = DATA.deadlineDay[index][0];
       } else if (item.classList.contains('calc-handler') && item.checked) {
         options.push(item.value);
       }
@@ -70,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     result += DATA.price[index];
 
-    totalPriceSum.textContent = result;
+    renderTextContent(result, site, maxDeadlineDay, minDeadlineDay);
   }
   
   function handlerCallBackForm(event) {
@@ -81,6 +140,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (target.classList.contains('calc-handler')) {
       priceCalculation(target);
+    }
+
+    if (adapt.checked) {
+      mobileTemplates.disabled = false;
+    } else {
+      mobileTemplates.disabled = true;
+      mobileTemplates.checked = false;
     }
   }
 
